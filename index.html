@@ -3,14 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; background: transparent; font-family: 'Segoe UI', sans-serif; }
-        .container { width: 100%; display: flex; flex-direction: column; align-items: center; }
+        body { margin: 0; padding: 0; overflow: hidden; background: transparent; font-family: 'Segoe UI', sans-serif; cursor: crosshair; }
+        .container { width: 100%; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
+        
         .progress-bg { 
             width: 85%; background: rgba(255, 241, 243, 0.9); border-radius: 20px; height: 35px; 
             border: 3px solid #ff85a2; position: relative; overflow: hidden; margin-top: 35px;
+            pointer-events: auto;
         }
         .progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #ff85a2, #ffb3c1); transition: width 0.8s ease; }
         .text { color: #d63384; font-size: 18px; margin-top: 8px; font-weight: bold; text-shadow: 1px 1px 2px white; }
+
+        /* Эффекты */
+        .particle { position: fixed; pointer-events: none; z-index: 9999; }
     </style>
 </head>
 <body>
@@ -18,29 +23,64 @@
         <div class="progress-bg"><div id="bar" class="progress-bar"></div></div>
         <div class="text">Собрано подарков: <span id="count">0</span> из 14</div>
     </div>
+
 <script>
     const total = 14;
     let lastCount = -1;
 
+    // 1. ЛОГИКА ШКАЛЫ (Таймер)
     function refreshProgress() {
-        // Читаем данные из общей памяти браузера
         let currentCount = parseInt(localStorage.getItem('march8_progress')) || 0;
-        
-        // Если число изменилось — обновляем визуально
         if (currentCount !== lastCount) {
             document.getElementById('bar').style.width = (currentCount / total * 100) + '%';
             document.getElementById('count').textContent = currentCount;
             lastCount = currentCount;
-
-            if (currentCount >= total) {
-                window.parent.postMessage('gameComplete', '*');
-            }
+            if (currentCount >= total) window.parent.postMessage('gameComplete', '*');
         }
     }
-
-    // Запускаем проверку каждые полсекунды
     setInterval(refreshProgress, 500);
-    refreshProgress();
+
+    // Обработка клика-сигнала
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('click') === 'true') {
+        let c = parseInt(localStorage.getItem('march8_progress')) || 0;
+        if (c < total) localStorage.setItem('march8_progress', c + 1);
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    // 2. ШЛЕЙФ И СЕРДЕЧКИ
+    const colors = ["#ff85a2", "#ffb3c1", "#fff700"];
+    
+    function createParticle(x, y, isHeart = false) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        if (isHeart) {
+            p.innerHTML = '❤️';
+            p.style.fontSize = Math.random() * 20 + 10 + 'px';
+        } else {
+            p.style.width = p.style.height = Math.random() * 5 + 3 + 'px';
+            p.style.background = colors[Math.floor(Math.random() * colors.length)];
+            p.style.borderRadius = '50%';
+        }
+        p.style.left = x + 'px';
+        p.style.top = y + 'px';
+        document.body.appendChild(p);
+
+        p.animate([
+            { transform: 'translate(0,0) scale(1)', opacity: 1 },
+            { transform: `translate(${(Math.random()-0.5)*100}px, ${(Math.random()-0.5)*100}px) scale(0)`, opacity: 0 }
+        ], { duration: 800 + Math.random()*400 }).onfinish = () => p.remove();
+    }
+
+    // Шлейф при движении
+    document.addEventListener('mousemove', (e) => {
+        if (Math.random() > 0.8) createParticle(e.clientX, e.clientY);
+    });
+
+    // Сердечки при клике
+    document.addEventListener('mousedown', (e) => {
+        for(let i=0; i<5; i++) createParticle(e.clientX, e.clientY, true);
+    });
 </script>
 </body>
 </html>
