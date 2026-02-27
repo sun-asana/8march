@@ -2,19 +2,15 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>8 March Progress</title>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background: transparent; font-family: 'Segoe UI', sans-serif; cursor: crosshair; }
         .container { width: 100%; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
-        
         .progress-bg { 
             width: 85%; background: rgba(255, 241, 243, 0.9); border-radius: 20px; height: 35px; 
-            border: 3px solid #ff85a2; position: relative; overflow: hidden; margin-top: 35px;
-            pointer-events: auto;
+            border: 3px solid #ff85a2; position: relative; overflow: hidden; margin-top: 35px; pointer-events: auto;
         }
         .progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #ff85a2, #ffb3c1); transition: width 0.8s ease; }
         .text { color: #d63384; font-size: 18px; margin-top: 8px; font-weight: bold; text-shadow: 1px 1px 2px white; }
-
         .sparkle { position: fixed; pointer-events: none; border-radius: 50%; z-index: 9999; filter: blur(1px); }
     </style>
 </head>
@@ -23,49 +19,42 @@
         <div class="progress-bg"><div id="bar" class="progress-bar"></div></div>
         <div class="text">Собрано подарков: <span id="count">0</span> из 14</div>
     </div>
-
 <script>
     const total = 14;
-    let lastCount = -1;
 
-    // ИСПОЛЬЗУЕМ sessionStorage (очищается при закрытии вкладки)
+    // СБРОС: Если страница загружена НЕ через "click=true", обнуляем всё
+    const urlParams = new URLSearchParams(window.location.search);
+    if (!urlParams.get('click')) {
+        sessionStorage.removeItem('march8_progress');
+    }
+
     function refreshProgress() {
         let currentCount = parseInt(sessionStorage.getItem('march8_progress')) || 0;
-        if (currentCount !== lastCount) {
-            document.getElementById('bar').style.width = (currentCount / total * 100) + '%';
-            document.getElementById('count').textContent = currentCount;
-            lastCount = currentCount;
-            if (currentCount >= total) window.parent.postMessage('gameComplete', '*');
-        }
+        document.getElementById('bar').style.width = (currentCount / total * 100) + '%';
+        document.getElementById('count').textContent = currentCount;
+        if (currentCount >= total) window.parent.postMessage('gameComplete', '*');
     }
+    
     setInterval(refreshProgress, 500);
 
-    const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('click') === 'true') {
         let c = parseInt(sessionStorage.getItem('march8_progress')) || 0;
         if (c < total) sessionStorage.setItem('march8_progress', c + 1);
         window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    // ЭФФЕКТ ЗВЕЗДОЧЕК
+    // ЗВЕЗДОЧКИ
     const colors = ["#fff700", "#ff85a2", "#e2daff"];
     function createSparkle(x, y) {
         const p = document.createElement('div');
         p.className = 'sparkle';
         const size = Math.random() * 4 + 2;
         p.style.width = p.style.height = size + 'px';
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        p.style.background = color;
-        p.style.boxShadow = `0 0 5px ${color}`;
-        p.style.left = x + 'px';
-        p.style.top = y + 'px';
+        p.style.background = colors[Math.floor(Math.random() * colors.length)];
+        p.style.left = x + 'px'; p.style.top = y + 'px';
         document.body.appendChild(p);
-        p.animate([
-            { transform: 'translate(0,0) scale(1)', opacity: 0.8 },
-            { transform: `translate(${(Math.random()-0.5)*40}px, ${(Math.random()-0.5)*40}px) scale(0)`, opacity: 0 }
-        ], { duration: 1000 + Math.random()*500, easing: 'ease-out' }).onfinish = () => p.remove();
+        p.animate([{opacity: 0.8}, {transform: `translate(${(Math.random()-0.5)*40}px, ${(Math.random()-0.5)*40}px) scale(0)`, opacity: 0}], {duration: 1000}).onfinish = () => p.remove();
     }
-
     document.addEventListener('mousemove', (e) => { if (Math.random() > 0.8) createSparkle(e.clientX, e.clientY); });
     document.addEventListener('mousedown', (e) => { for(let i=0; i<8; i++) createSparkle(e.clientX, e.clientY); });
 </script>
