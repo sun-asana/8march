@@ -7,7 +7,7 @@
         .container { width: 100%; display: flex; flex-direction: column; align-items: center; }
         .progress-bg { 
             width: 85%; background: rgba(255, 241, 243, 0.9); border-radius: 20px; height: 35px; 
-            border: 3px solid #ff85a2; position: relative; overflow: hidden; margin-top: 40px; /* ТУТ ВЫСОТА ШКАЛЫ */
+            border: 3px solid #ff85a2; position: relative; overflow: hidden; margin-top: 35px;
         }
         .progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #ff85a2, #ffb3c1); transition: width 0.8s ease; }
         .text { color: #d63384; font-size: 18px; margin-top: 8px; font-weight: bold; text-shadow: 1px 1px 2px white; }
@@ -19,32 +19,28 @@
         <div class="text">Собрано подарков: <span id="count">0</span> из 14</div>
     </div>
 <script>
-    // Используем localStorage, чтобы счет не обнулялся
-    let counter = parseInt(localStorage.getItem('march8_progress')) || 0;
     const total = 14;
+    let lastCount = -1;
 
-    function updateDisplay() {
-        document.getElementById('bar').style.width = (counter / total * 100) + '%';
-        document.getElementById('count').textContent = counter;
-    }
+    function refreshProgress() {
+        // Читаем данные из общей памяти браузера
+        let currentCount = parseInt(localStorage.getItem('march8_progress')) || 0;
+        
+        // Если число изменилось — обновляем визуально
+        if (currentCount !== lastCount) {
+            document.getElementById('bar').style.width = (currentCount / total * 100) + '%';
+            document.getElementById('count').textContent = currentCount;
+            lastCount = currentCount;
 
-    // Если в ссылке есть параметр ?click=true, прибавляем единичку
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('click') === 'true') {
-        if (counter < total) {
-            counter++;
-            localStorage.setItem('march8_progress', counter);
+            if (currentCount >= total) {
+                window.parent.postMessage('gameComplete', '*');
+            }
         }
-        // Убираем параметр из ссылки, чтобы не считало при простом обновлении
-        window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    updateDisplay();
-
-    // Авто-переход в Genially при достижении 14
-    if (counter >= total) {
-        window.parent.postMessage('gameComplete', '*');
-    }
+    // Запускаем проверку каждые полсекунды
+    setInterval(refreshProgress, 500);
+    refreshProgress();
 </script>
 </body>
 </html>
