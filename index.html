@@ -2,90 +2,76 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>8 March Progress</title>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background: transparent; font-family: 'Segoe UI', sans-serif; }
-        .container { width: 100%; padding: 10px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; height: 100vh; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
         
-        /* Шкала прогресса - ОБНОВЛЕННЫЕ СТИЛИ */
+        /* Шкала - ПОДНЯЛИ ВЫШЕ И ПОДПРАВИЛИ РАЗМЕР */
         .progress-bg { 
-            width: 90%; 
-            background: #fff1f3; 
-            border-radius: 20px; 
-            height: 35px; /* СДЕЛАЛИ ШИРЕ */
-            border: 3px solid #ff85a2; /* ЧУТЬ БОЛЬШЕ ОБВОДКИ */
+            width: 85%; 
+            background: rgba(255, 241, 243, 0.9); 
+            border-radius: 25px; 
+            height: 38px; /* Оптимальная ширина */
+            border: 3px solid #ff85a2; 
             position: relative; 
             overflow: hidden; 
-            box-shadow: 0 4px 10px rgba(255, 133, 162, 0.2); 
-            margin-top: 100px; /* ОПУСТИЛИ ШКАЛУ НИЖЕ */
+            box-shadow: 0 4px 12px rgba(255, 133, 162, 0.2); 
+            margin-top: 50px; /* ВОТ ЗДЕСЬ МЫ ЕЁ ПОДНЯЛИ */
+            pointer-events: auto;
         }
         
         .progress-bar { 
-            width: 0%; 
-            height: 100%; 
-            background: linear-gradient(90deg, #ff85a2, #ffb3c1); 
-            border-radius: 15px; 
-            transition: width 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            width: 0%; height: 100%; 
+            background: linear-gradient(90deg, #ff85a2, #ffb3c1, #ff85a2); 
+            background-size: 200% 100%;
+            animation: moveGradient 3s linear infinite;
+            border-radius: 20px; 
+            transition: width 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
+
+        @keyframes moveGradient {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
         }
         
-        .text { color: #d63384; font-size: 16px; margin-top: 8px; font-weight: bold; text-shadow: 1px 1px 2px rgba(255,255,255,0.8); }
-
-        /* Стили для шлейфа (звездочки) */
+        .text { color: #d63384; font-size: 18px; margin-top: 10px; font-weight: bold; text-shadow: 1px 1px 2px white; pointer-events: auto; }
         .sparkle { position: fixed; pointer-events: none; border-radius: 50%; z-index: 9999; filter: blur(1px); }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <div class="progress-bg"><div id="bar" class="progress-bar"></div></div>
-    <div class="text">Собрано подарков: <span id="count">0</span> из 14</div>
-</div>
+    <div class="container">
+        <div class="progress-bg"><div id="bar" class="progress-bar"></div></div>
+        <div class="text">Собрано подарков: <span id="count">0</span> из 14</div>
+    </div>
 
 <script>
     let counter = 0;
     const total = 14;
 
-    // 1. ЛОГИКА ШКАЛЫ (слушаем сигналы от Genially)
     window.addEventListener('message', (e) => {
         if (e.data === 'itemClicked') {
             if (counter < total) {
                 counter++;
                 document.getElementById('bar').style.width = (counter / total * 100) + '%';
                 document.getElementById('count').textContent = counter;
-                
-                if (counter === total) {
-                    // Сигнал в Genially, что пора перевернуть страницу
-                    window.parent.postMessage('gameComplete', '*');
-                }
+                if (counter === total) window.parent.postMessage('gameComplete', '*');
             }
         }
     }, false);
 
-    // 2. ШЛЕЙФ (звездочки)
     const colors = ["#fff700", "#ff85a2", "#e2daff"];
-    let lastMove = 0;
-
     document.addEventListener('mousemove', (e) => {
-        const now = Date.now();
-        if (now - lastMove < 50) return;
-        lastMove = now;
-
         const p = document.createElement('div');
         p.className = 'sparkle';
-        const size = Math.random() * 4 + 2;
-        p.style.width = size + 'px';
-        p.style.height = size + 'px';
-        p.style.left = e.clientX + 'px';
-        p.style.top = e.clientY + 'px';
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        p.style.background = color;
-        p.style.boxShadow = `0 0 5px ${color}`;
+        const size = Math.random() * 5 + 3;
+        p.style.width = size + 'px'; p.style.height = size + 'px';
+        p.style.left = e.clientX + 'px'; p.style.top = e.clientY + 'px';
+        p.style.background = colors[Math.floor(Math.random() * colors.length)];
         document.body.appendChild(p);
-
         p.animate([
-            { transform: 'translate(0,0) scale(1)', opacity: 0.7 },
-            { transform: `translate(${(Math.random()-0.5)*50}px, ${(Math.random()-0.5)*50}px) scale(0)`, opacity: 0 }
-        ], { duration: 1000, easing: 'ease-out' }).onfinish = () => p.remove();
+            { transform: 'translate(0,0) scale(1)', opacity: 0.8 },
+            { transform: `translate(${(Math.random()-0.5)*60}px, ${(Math.random()-0.5)*60}px) scale(0)`, opacity: 0 }
+        ], { duration: 1000 }).onfinish = () => p.remove();
     });
 </script>
 </body>
