@@ -7,12 +7,30 @@
         body { margin: 0; padding: 0; overflow: hidden; background: transparent; font-family: 'Segoe UI', sans-serif; }
         .container { width: 100%; padding: 10px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; }
         
-        /* Шкала */
-        .progress-bg { width: 90%; background: #fff1f3; border-radius: 20px; height: 25px; border: 2px solid #ff85a2; position: relative; overflow: hidden; box-shadow: 0 4px 10px rgba(255, 133, 162, 0.2); }
-        .progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #ff85a2, #ffb3c1); border-radius: 15px; transition: width 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        /* Шкала прогресса - ОБНОВЛЕННЫЕ СТИЛИ */
+        .progress-bg { 
+            width: 90%; 
+            background: #fff1f3; 
+            border-radius: 20px; 
+            height: 35px; /* СДЕЛАЛИ ШИРЕ */
+            border: 3px solid #ff85a2; /* ЧУТЬ БОЛЬШЕ ОБВОДКИ */
+            position: relative; 
+            overflow: hidden; 
+            box-shadow: 0 4px 10px rgba(255, 133, 162, 0.2); 
+            margin-top: 100px; /* ОПУСТИЛИ ШКАЛУ НИЖЕ */
+        }
+        
+        .progress-bar { 
+            width: 0%; 
+            height: 100%; 
+            background: linear-gradient(90deg, #ff85a2, #ffb3c1); 
+            border-radius: 15px; 
+            transition: width 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
+        
         .text { color: #d63384; font-size: 16px; margin-top: 8px; font-weight: bold; text-shadow: 1px 1px 2px rgba(255,255,255,0.8); }
 
-        /* Стили для шлейфа (те самые нежные звездочки) */
+        /* Стили для шлейфа (звездочки) */
         .sparkle { position: fixed; pointer-events: none; border-radius: 50%; z-index: 9999; filter: blur(1px); }
     </style>
 </head>
@@ -43,7 +61,7 @@
         }
     }, false);
 
-    // 2. НЕВЕСОМЫЙ ШЛЕЙФ (теперь он живет здесь)
+    // 2. ШЛЕЙФ (звездочки)
     const colors = ["#fff700", "#ff85a2", "#e2daff"];
     let lastMove = 0;
 
