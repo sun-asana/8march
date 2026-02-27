@@ -2,10 +2,12 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <title>8 March Progress</title>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background: transparent; font-family: 'Segoe UI', sans-serif; cursor: crosshair; }
         .container { width: 100%; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
         
+        /* Шкала - аккуратная и поднятая */
         .progress-bg { 
             width: 85%; background: rgba(255, 241, 243, 0.9); border-radius: 20px; height: 35px; 
             border: 3px solid #ff85a2; position: relative; overflow: hidden; margin-top: 35px;
@@ -14,8 +16,8 @@
         .progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #ff85a2, #ffb3c1); transition: width 0.8s ease; }
         .text { color: #d63384; font-size: 18px; margin-top: 8px; font-weight: bold; text-shadow: 1px 1px 2px white; }
 
-        /* Эффекты */
-        .particle { position: fixed; pointer-events: none; z-index: 9999; }
+        /* Частицы - ТОЛЬКО МАЛЕНЬКИЕ ЗВЕЗДОЧКИ */
+        .sparkle { position: fixed; pointer-events: none; border-radius: 50%; z-index: 9999; filter: blur(1px); }
     </style>
 </head>
 <body>
@@ -28,7 +30,7 @@
     const total = 14;
     let lastCount = -1;
 
-    // 1. ЛОГИКА ШКАЛЫ (Таймер)
+    // 1. ЛОГИКА ШКАЛЫ (Таймер для реального времени)
     function refreshProgress() {
         let currentCount = parseInt(localStorage.getItem('march8_progress')) || 0;
         if (currentCount !== lastCount) {
@@ -38,6 +40,7 @@
             if (currentCount >= total) window.parent.postMessage('gameComplete', '*');
         }
     }
+    // Проверяем каждые 0.5 сек
     setInterval(refreshProgress, 500);
 
     // Обработка клика-сигнала
@@ -48,38 +51,41 @@
         window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    // 2. ШЛЕЙФ И СЕРДЕЧКИ
-    const colors = ["#ff85a2", "#ffb3c1", "#fff700"];
+    // 2. НЕЖНЫЙ ШЛЕЙФ ИЗ ЗВЕЗДОЧЕК (Возвращаем лучшую версию)
+    const colors = ["#fff700", "#ff85a2", "#e2daff"]; // Желтый, Розовый, Лавандовый
     
-    function createParticle(x, y, isHeart = false) {
+    function createSparkle(x, y) {
         const p = document.createElement('div');
-        p.className = 'particle';
-        if (isHeart) {
-            p.innerHTML = '❤️';
-            p.style.fontSize = Math.random() * 20 + 10 + 'px';
-        } else {
-            p.style.width = p.style.height = Math.random() * 5 + 3 + 'px';
-            p.style.background = colors[Math.floor(Math.random() * colors.length)];
-            p.style.borderRadius = '50%';
-        }
+        p.className = 'sparkle';
+        
+        // Делаем их очень маленькими и аккуратными
+        const size = Math.random() * 4 + 2; // от 2 до 6 пикселей
+        p.style.width = size + 'px';
+        p.style.height = size + 'px';
+        
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        p.style.background = color;
+        p.style.boxShadow = `0 0 5px ${color}`; // Мягкое свечение
+        
         p.style.left = x + 'px';
         p.style.top = y + 'px';
         document.body.appendChild(p);
 
+        // Плавная анимация: они немного разлетаются и гаснут
         p.animate([
-            { transform: 'translate(0,0) scale(1)', opacity: 1 },
-            { transform: `translate(${(Math.random()-0.5)*100}px, ${(Math.random()-0.5)*100}px) scale(0)`, opacity: 0 }
-        ], { duration: 800 + Math.random()*400 }).onfinish = () => p.remove();
+            { transform: 'translate(0,0) scale(1)', opacity: 0.8 },
+            { transform: `translate(${(Math.random()-0.5)*40}px, ${(Math.random()-0.5)*40}px) scale(0)`, opacity: 0 }
+        ], { duration: 1000 + Math.random()*500, easing: 'ease-out' }).onfinish = () => p.remove();
     }
 
-    // Шлейф при движении
+    // Шлейф при движении (легкий, не на каждый кадр)
     document.addEventListener('mousemove', (e) => {
-        if (Math.random() > 0.8) createParticle(e.clientX, e.clientY);
+        if (Math.random() > 0.8) createSparkle(e.clientX, e.clientY);
     });
 
-    // Сердечки при клике
+    // Звездочки при клике (чуть больше, но всё еще звездочки)
     document.addEventListener('mousedown', (e) => {
-        for(let i=0; i<5; i++) createParticle(e.clientX, e.clientY, true);
+        for(let i=0; i<8; i++) createSparkle(e.clientX, e.clientY);
     });
 </script>
 </body>
