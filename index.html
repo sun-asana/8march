@@ -67,7 +67,7 @@
 
     document.addEventListener('mousemove', (e) => {
         const now = Date.now();
-        if (now - lastMove < 60) return; 
+        if (now - lastMove < 35) return; 
         lastMove = now;
 
         const particle = document.createElement('div');
